@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: CC0-1.0
+
 set -e
 
 if [ -z ${N64_GCCPREFIX+x} ]  # if N64_GCCPREFIX is not set

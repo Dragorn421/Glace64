@@ -22,6 +22,8 @@ OBJS = $(addprefix $(BUILD_DIR)/,$(C_FILES:.c=.o))
 
 $(ROMNAME).z64: N64_ROM_TITLE = "Glace64"
 
+$(OBJS): CFLAGS += -I.
+
 $(BUILD_DIR)/$(ROMNAME).elf: $(OBJS)
 
 clean:
