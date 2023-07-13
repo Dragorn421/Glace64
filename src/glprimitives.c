@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: CC0-1.0
 
+#include <GL/gl_enums.h>
 #include <debug.h>
 
 #include <math.h>
