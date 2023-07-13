@@ -3,6 +3,7 @@
 #include <controller.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -12,49 +13,12 @@
 #include <GL/gl_integration.h>
 #include <GL/glu.h>
 
+#include "include/audio.h"
+
 #include "include/glprimitives.h"
 
 void callback(float radius, int n_segments, int iy, int itheta) {
   glColor3f((float)iy / n_segments, (float)itheta / n_segments, 1.0f);
-}
-
-static bool strendswith(const char *str, const char *suffix) {
-  char *p = strstr(str, suffix);
-  return p && p[strlen(suffix)] == '\0';
-}
-
-void play_song(const char *song_path) { // setup audio
-  enum SONG_TYPE { SONG_XM, SONG_YM };
-
-  xm64player_t xm;
-  ym64player_t ym;
-  ym64player_songinfo_t yminfo;
-  enum SONG_TYPE song_type;
-  const char *song_name;
-  int song_channels;
-  int song_romsz = 0, song_ramsz = 0;
-
-  if (strendswith(song_path, ".ym64") || strendswith(song_path, ".YM64"))
-    song_type = SONG_YM;
-  else
-    song_type = SONG_XM;
-  {
-    int fh = dfs_open(song_path + 5);
-    song_romsz = dfs_size(fh);
-    dfs_close(fh);
-  }
-
-  debugf("Loading %s\n", song_path);
-  if (song_type == SONG_XM) {
-    xm64player_open(&xm, song_path);
-    xm64player_play(&xm, 0);
-  } else {
-    ym64player_open(&ym, song_path, &yminfo);
-    ym64player_play(&ym, 0);
-  }
-  //
-  // // Unmute all channels
-  // memset(mute, 0, sizeof(mute));
 }
 
 int main() {
@@ -86,47 +50,11 @@ int main() {
     dfs_init(DFS_DEFAULT_LOCATION);
   }
 
-  rdpq_font_t *fnt1 = rdpq_font_load("rom:/Roboto-Medium.font64");
+  rdpq_font_t *fnt1 = rdpq_font_load("rom:/Roboto-Bold.font64");
   debugf("fnt1 ptr: %p\n", fnt1);
 
-  audio_init(44100, 4);
-  mixer_init(32);
-
-  // play song, setup loop vars
-  enum SONG_TYPE { SONG_XM, SONG_YM };
-
-  const char* song_path = "rom:/AQUA.xm64";
-
-  xm64player_t xm;
-  ym64player_t ym;
-  ym64player_songinfo_t yminfo;
-  enum SONG_TYPE song_type;
-  const char *song_name;
-  int song_channels;
-  int song_romsz = 0, song_ramsz = 0;
-
-  if (strendswith(song_path, ".ym64") || strendswith(song_path, ".YM64"))
-    song_type = SONG_YM;
-  else
-    song_type = SONG_XM;
-  {
-    int fh = dfs_open(song_path + 5);
-    song_romsz = dfs_size(fh);
-    dfs_close(fh);
-  }
-
-  debugf("Loading %s\n", song_path);
-  if (song_type == SONG_XM) {
-    xm64player_open(&xm, song_path);
-    xm64player_play(&xm, 0);
-  } else {
-    ym64player_open(&ym, song_path, &yminfo);
-    ym64player_play(&ym, 0);
-  }
-
-  uint32_t start_play_loop = TICKS_READ();
-  bool first_loop = true;
-  int audiosz = audio_get_buffer_length();
+  m_audio_init();
+  // m_audio_change_bgm("rom:/AQUA.xm64");
 
   while (true) {
     // get delta
@@ -192,24 +120,8 @@ int main() {
         n_segments--;
     }
 
-    { // audio processing loop, write the audio to the rsp.
-      extern int64_t __mixer_profile_rsp, __wav64_profile_dma;
-      __mixer_profile_rsp = __wav64_profile_dma = 0;
-
-      uint32_t t0 = TICKS_READ();
-
-      while (!audio_can_write()) {
-      }
-
-      uint32_t t1 = TICKS_READ();
-
-      int16_t *out = audio_write_begin();
-      mixer_poll(out, audiosz);
-      audio_write_end();
-
-      uint32_t t2 = TICKS_READ();
-
-      first_loop = false;
-    }
+    m_audio_update();
   }
+
+  m_audio_clean();
 }
