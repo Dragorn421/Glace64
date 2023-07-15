@@ -8,11 +8,11 @@ AudioState as = {
     4,
     32,
     {
-      0,
-      0,
-      0,
-      "",
-    }
+        0,
+        0,
+        0,
+        "",
+    },
 };
 
 static bool strendswith(const char *str, const char *suffix) {
@@ -35,25 +35,20 @@ static void update_single_track(Song s) {
   extern int64_t __mixer_profile_rsp, __wav64_profile_dma;
   __mixer_profile_rsp = __wav64_profile_dma = 0;
 
-  uint32_t t0 = TICKS_READ();
-
   while (!audio_can_write()) {
   }
-
-  uint32_t t1 = TICKS_READ();
 
   int16_t *out = audio_write_begin();
   mixer_poll(out, s.audiosz);
   audio_write_end();
-
-  uint32_t t2 = TICKS_READ();
 }
 
 void m_audio_update() { // audio processing loop, write the audio to the rsp.
   if (as.curr_bgm.is_active) { // i'm not sure how many tracks we need
-                             // concurrently, i'm just using the one bgm track
-                             // now but more could be added to the structure.
-    debugf("song updating: addr %p, at path %s, with audiosz %d.\n", &as.curr_bgm, as.curr_bgm.song_path, as.curr_bgm.audiosz);
+                               // concurrently, i'm just using the one bgm track
+                               // now but more could be added to the structure.
+    debugf("song updating: addr %p, at path %s, with audiosz %d.\n",
+           &as.curr_bgm, as.curr_bgm.song_path, as.curr_bgm.audiosz);
     update_single_track(as.curr_bgm);
   }
 }
@@ -66,7 +61,7 @@ void m_audio_change_bgm(const char *song_path) {
   // curr_bgm to NULL. use an is_active field? is there a cleaner way of doing
   // this?
   if (as.curr_bgm.is_active) { // don't restart the song if it's played again
-                                // while it's already active.
+                               // while it's already active.
     if (strcmp(as.curr_bgm.song_path, song_path)) {
       debugf("[Audio] Tried to play the same song twice, ignoring command... "
              "(%s)",
@@ -78,9 +73,11 @@ void m_audio_change_bgm(const char *song_path) {
   ym64player_t ym;
   ym64player_songinfo_t yminfo;
   enum SONG_TYPE song_type;
-  const char *song_name;
-  int song_channels;
-  int song_romsz = 0, song_ramsz = 0;
+  // const char *song_name;
+  // int song_channels;
+  int song_romsz = 0;
+  (void)song_romsz; // suppress -Werror=unused-but-set-variable
+  // int song_ramsz = 0;
 
   if (strendswith(song_path, ".ym64") || strendswith(song_path, ".YM64"))
     song_type = SONG_YM;
@@ -107,9 +104,9 @@ void m_audio_change_bgm(const char *song_path) {
   // directly into the AudioState* to avoid re-mallocing unnecessarily.
 
   as.curr_bgm = (Song){
-     true, //initially active.
-     start_play_loop,
-     audiosz,
-     song_path,
+      true, // initially active.
+      start_play_loop,
+      audiosz,
+      song_path,
   };
 }
