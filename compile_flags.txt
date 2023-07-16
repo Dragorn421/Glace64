@@ -1,1 +1,3 @@
 -I.
+-Iinclude
+-Ilibdragon_install/mips64-elf/include

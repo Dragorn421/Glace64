@@ -14,13 +14,13 @@ void splitscreen_area_activate(struct SplitScreenArea *area) {
   glEnable(GL_SCISSOR_TEST);
   glScissor(x, y, w, h);
 
-  // Set the viewport (for the transform from -1,1 coordinates to window coordinates:
-  // instead of mapping to the full window, map to the target area)
+  // Set the viewport (for the transform from -1,1 coordinates to window
+  // coordinates: instead of mapping to the full window, map to the target area)
   glViewport(x, y, w, h);
 
   // make a projection matrix matching the area
-  // ideally left to the caller? eventually this would clash with a camera system
-  // for now this is mainly to fix the aspect ratio
+  // ideally left to the caller? eventually this would clash with a camera
+  // system for now this is mainly to fix the aspect ratio
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(80, (float)w / h, 0.1, 30);

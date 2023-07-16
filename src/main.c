@@ -107,7 +107,8 @@ int main() {
       glRotatef(90, 1, 0, 0);
       glprim_sphere(radius, n_segments, callback);
 
-      // reset the viewport and scissoring (impacts later rdpq_font calls otherwise)
+      // reset the viewport and scissoring (impacts later rdpq_font calls
+      // otherwise)
       splitscreen_area_reset();
 
       gl_context_end();
