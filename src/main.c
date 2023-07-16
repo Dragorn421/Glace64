@@ -16,9 +16,11 @@
 #include "include/audio.h"
 #include "include/glprimitives.h"
 #include "include/input.h"
+#include "include/object.h"
 #include "include/splitscreen.h"
 
-#include "include/mover.h"
+// object type includes
+#include "include/objects/player.h"
 
 void callback(float radius, int n_segments, int iy, int itheta) {
   glColor3f((float)iy / n_segments, (float)itheta / n_segments, 1.0f);
@@ -41,6 +43,9 @@ int main() {
   float rot_pitch = 0.0f;
   float rot_yaw = 0.0f;
   uint32_t ticks_last = TICKS_READ();
+
+  object_init();
+  Object *player_obj = object_add((Object *)player_build());
 
   { // setup mats
     glMatrixMode(GL_PROJECTION);
@@ -75,6 +80,9 @@ int main() {
 
     // then, grab the input before we try to access old data.
     input_update();
+    object_update(); // update after the inputs have been processed.
+
+    // draw after the objects have updated, don't draw old state.
 
     area_right.bl_x = area_left.tr_x = area_left_right_divide_x;
 
@@ -100,7 +108,12 @@ int main() {
       glLoadIdentity();
       gluLookAt(0, 0, 5, 0, 0, 0, 0, 1, 0);
 
-      entity_draw(); // drawing the entity under the modelview.
+      object_draw(); // when should this be called? how can we control the
+                     // drawing context that the object is drawn in? this needs
+                     // some more thought put into it. maybe the draw()
+                     // lifecycle method takes in a DrawContext structure? how
+                     // can we control which SCREEN it's drawn on, in
+                     // particular? (for now, draw to the left.)
 
       // draw to the right area
       splitscreen_area_activate(&area_right);
@@ -151,11 +164,13 @@ int main() {
         area_left_right_divide_x +=
             (input_state.left.pressed.C_left ? -1 : 1) * 50 * seconds_elapsed;
 
-      entity_update();
+      if (input_state.left.down.C_down)
+        object_remove_by_ptr(player_obj);
     }
 
     m_audio_update();
   }
 
   m_audio_clean();
+  object_clean();
 }
