@@ -15,6 +15,7 @@
 
 #include "include/audio.h"
 #include "include/glprimitives.h"
+#include "include/input.h"
 #include "include/splitscreen.h"
 
 void callback(float radius, int n_segments, int iy, int itheta) {
@@ -24,8 +25,10 @@ void callback(float radius, int n_segments, int iy, int itheta) {
 int main() {
   debug_init(DEBUG_FEATURE_ALL);
   debugf("hello world!\n");
-  controller_init();
   rdpq_init();
+
+  input_init();
+
   gl_init();
   display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_CORRECT,
                ANTIALIAS_RESAMPLE_FETCH_NEEDED);
@@ -62,11 +65,14 @@ int main() {
   float area_left_right_divide_x = display_get_width() * 0.6f;
 
   while (true) {
-    // get delta
+    // get delta before anything else.
     uint32_t ticks_now = TICKS_READ();
     uint32_t ticks_elapsed = TICKS_DISTANCE(ticks_last, ticks_now);
     ticks_last = ticks_now;
     float seconds_elapsed = (float)ticks_elapsed / TICKS_PER_SECOND;
+
+    // then, grab the input before we try to access old data.
+    input_update();
 
     area_right.bl_x = area_left.tr_x = area_left_right_divide_x;
 
@@ -128,27 +134,21 @@ int main() {
                         // every rendering pass.
 
     {
-      controller_scan();
-
-      struct controller_data down = get_keys_down();
-      struct controller_data pressed = get_keys_pressed();
-      float x = pressed.c[0].x / 127.0f / 0.7f;
-      float y = pressed.c[0].y / 127.0f / 0.7f;
       float rotspeed_yaw = 360; // degrees per second
       float rotspeed_pitch = 360;
 
-      rot_yaw += x * seconds_elapsed * rotspeed_yaw;
-      rot_pitch += y * seconds_elapsed * rotspeed_pitch;
+      rot_yaw += input_state.p1.pressed.x * seconds_elapsed * rotspeed_yaw;
+      rot_pitch += input_state.p1.pressed.y * seconds_elapsed * rotspeed_pitch;
 
-      if (down.c[0].C_up)
+      if (input_state.p1.down.C_up)
         n_segments++;
-      if (down.c[0].C_down)
+      if (input_state.p1.down.C_down)
         n_segments--;
 
       // move the divide between the left and right areas using C left/right
-      if (pressed.c[0].C_left || pressed.c[0].C_right)
+      if (input_state.p1.pressed.C_left || input_state.p1.pressed.C_right)
         area_left_right_divide_x +=
-            (pressed.c[0].C_left ? -1 : 1) * 50 * seconds_elapsed;
+            (input_state.p1.pressed.C_left ? -1 : 1) * 50 * seconds_elapsed;
     }
 
     m_audio_update();
