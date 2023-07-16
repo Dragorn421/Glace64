@@ -9,19 +9,21 @@ typedef struct SI_condat SI_condat;
 // any input calculation in the program should be sourced from the structure
 // modified ONLY here. (?)
 
-// you were saying something about multiplayer, so i won't hard-code one player
-// into the input structure for now. maybe narrow this data structure if it
-// becomes clear we won't do that?
-
+// this is redundant and sucks, we'll put up with it for now.
 typedef struct PlayerInput {
-  SI_condat down; // it bothers me very much that there's redundant data in this
-                  // structure, but i won't worry about it for now.
+  SI_condat down;
   SI_condat pressed;
   SI_condat up;
 } PlayerInput;
 
+// the input module handles organizing stuff into left and right and global,
+// nothing outside of this module should really have a concept of "controller 0
+// and controller 1" and etc.
 typedef struct InputState {
-  PlayerInput p1;
+  PlayerInput left; // for the left and right screens of the splitscreen layout,
+                    // respectively.
+  PlayerInput right;
+  PlayerInput global; // for global inputs, like pausing and etc.
 } InputState;
 
 extern InputState input_state;

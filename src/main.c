@@ -137,18 +137,19 @@ int main() {
       float rotspeed_yaw = 360; // degrees per second
       float rotspeed_pitch = 360;
 
-      rot_yaw += input_state.p1.pressed.x * seconds_elapsed * rotspeed_yaw;
-      rot_pitch += input_state.p1.pressed.y * seconds_elapsed * rotspeed_pitch;
+      rot_yaw += input_state.left.pressed.x * seconds_elapsed * rotspeed_yaw;
+      rot_pitch +=
+          input_state.left.pressed.y * seconds_elapsed * rotspeed_pitch;
 
-      if (input_state.p1.down.C_up)
+      if (input_state.left.down.C_up)
         n_segments++;
-      if (input_state.p1.down.C_down)
+      if (input_state.left.down.C_down)
         n_segments--;
 
       // move the divide between the left and right areas using C left/right
-      if (input_state.p1.pressed.C_left || input_state.p1.pressed.C_right)
+      if (input_state.left.pressed.C_left || input_state.left.pressed.C_right)
         area_left_right_divide_x +=
-            (input_state.p1.pressed.C_left ? -1 : 1) * 50 * seconds_elapsed;
+            (input_state.left.pressed.C_left ? -1 : 1) * 50 * seconds_elapsed;
 
       entity_update();
     }

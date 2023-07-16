@@ -18,11 +18,12 @@ void input_update() {
   pressed = get_keys_pressed();
   up = get_keys_up();
 
-  input_state.p1.down = down.c[0];
-  input_state.p1.pressed = pressed.c[0];
-  input_state.p1.up = up.c[0];
+  // left mapped directly to the first player for now.
+  input_state.left.down = down.c[0];
+  input_state.left.pressed = pressed.c[0];
+  input_state.left.up = up.c[0];
 
   // then preprocess and assign to the input structure.
-  input_state.p1.pressed.x = input_state.p1.pressed.x / 127.0f / 0.7f;
-  input_state.p1.pressed.y = input_state.p1.pressed.y / 127.0f / 0.7f;
+  input_state.left.pressed.x = input_state.left.pressed.x / 127.0f / 0.7f;
+  input_state.left.pressed.y = input_state.left.pressed.y / 127.0f / 0.7f;
 }
