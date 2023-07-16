@@ -23,6 +23,6 @@ void input_update() {
   input_state.p1.up = up.c[0];
 
   // then preprocess and assign to the input structure.
-  input_state.p1.pressed.x = pressed.c[0].x / 127.0f / 0.7f;
-  input_state.p1.pressed.y = pressed.c[0].y / 127.0f / 0.7f;
+  input_state.p1.pressed.x = input_state.p1.pressed.x / 127.0f / 0.7f;
+  input_state.p1.pressed.y = input_state.p1.pressed.y / 127.0f / 0.7f;
 }

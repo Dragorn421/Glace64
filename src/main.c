@@ -18,6 +18,8 @@
 #include "include/input.h"
 #include "include/splitscreen.h"
 
+#include "include/mover.h"
+
 void callback(float radius, int n_segments, int iy, int itheta) {
   glColor3f((float)iy / n_segments, (float)itheta / n_segments, 1.0f);
 }
@@ -97,10 +99,12 @@ int main() {
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
       gluLookAt(0, 0, 5, 0, 0, 0, 0, 1, 0);
-      glRotatef(rot_pitch, 1, 0, 0);
-      glRotatef(rot_yaw, 0, 1, 0);
+      // glRotatef(rot_pitch, 1, 0, 0);
+      // glRotatef(rot_yaw, 0, 1, 0);
 
       glprim_sphere(radius, n_segments, callback);
+
+      entity_draw(); // drawing the entity under the modelview.
 
       // draw to the right area
       splitscreen_area_activate(&area_right);
@@ -149,6 +153,8 @@ int main() {
       if (input_state.p1.pressed.C_left || input_state.p1.pressed.C_right)
         area_left_right_divide_x +=
             (input_state.p1.pressed.C_left ? -1 : 1) * 50 * seconds_elapsed;
+
+      entity_update();
     }
 
     m_audio_update();
