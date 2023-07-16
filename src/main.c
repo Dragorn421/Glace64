@@ -99,10 +99,6 @@ int main() {
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
       gluLookAt(0, 0, 5, 0, 0, 0, 0, 1, 0);
-      // glRotatef(rot_pitch, 1, 0, 0);
-      // glRotatef(rot_yaw, 0, 1, 0);
-
-      glprim_sphere(radius, n_segments, callback);
 
       entity_draw(); // drawing the entity under the modelview.
 
