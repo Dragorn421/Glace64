@@ -60,8 +60,7 @@ void glprim_sphere(float radius, int n_segments,
   }
 }
 
-// data for a basic cube model.
-static const Vertex cube_vertices[] = {
+static const FullVertex cube_vertices[] = {
     // top
     {.position = {0.5, 0.5, 2},
      .texcoord = {1.024f, 0.992f},
@@ -172,8 +171,55 @@ static const uint16_t cube_indices[] = {
     12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23,
 };
 
-// uses a vao and ibo, unlike the sphere.
-void glprim_cube(float position[3]) {
+FullRender cube_render = {
+    (FullVertex *)cube_vertices,
+    (uint16_t *)cube_indices,
+    sizeof(cube_indices) / sizeof(uint16_t),
+};
+
+static const FullVertex pyramid_vertices[] = {
+    // base
+    {.position = {-1.f, -1.f, 0.f},
+     .texcoord = {0.f, 0.f},
+     .normal = {0.f, 0.f, -1.f},
+     .color = 0xFF00FF00}, /* 0 */
+    {.position = {1.f, -1.f, 0.f},
+     .texcoord = {1.f, 0.f},
+     .normal = {0.f, 0.f, -1.f},
+     .color = 0xFF00FF00}, /* 1 */
+    {.position = {1.f, 1.f, 0.f},
+     .texcoord = {1.f, 1.f},
+     .normal = {0.f, 0.f, -1.f},
+     .color = 0xFF00FF00}, /* 2 */
+    {.position = {-1.f, 1.f, 0.f},
+     .texcoord = {0.f, 1.f},
+     .normal = {0.f, 0.f, -1.f},
+     .color = 0xFF00FF00}, /* 3 */
+
+    // top
+    {.position = {0.f, 0.f, 2.f},
+     .texcoord = {0.5f, 0.5f},
+     .normal = {0.f, 0.f, 1.f},
+     .color = 0xFFFF00FF}, /* 4 */
+};
+
+static const uint16_t pyramid_indices[] = {
+    0, 1, 4,          // front face
+    1, 2, 4,          // right face
+    2, 3, 4,          // back face
+    3, 0, 4,          // left face
+    0, 1, 2, 0, 2, 3, // bottom face
+};
+
+FullRender pyramid_render = {
+    (FullVertex *)pyramid_vertices,
+    (uint16_t *)pyramid_indices,
+    sizeof(pyramid_indices) / sizeof(uint16_t),
+};
+
+// all vertices specify a position, and are offset by that position in the
+// modelview. use a push-pop design for the function.
+void glprim_fullvtx(FullRender *v, float position[3]) {
   glPushMatrix();
   // don't need to do any linear algebra here, since we're using a fixed camera
   // position for the left screen? i think?
@@ -189,22 +235,31 @@ void glprim_cube(float position[3]) {
 
   // the vertex structure just happens to match the vertex array layout that
   // we're using here.
-  glVertexPointer(3, GL_FLOAT, sizeof(Vertex),
-                  (void *)(0 * sizeof(float) + (void *)cube_vertices));
-  glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex),
-                    (void *)(3 * sizeof(float) + (void *)cube_vertices));
-  glNormalPointer(GL_FLOAT, sizeof(Vertex),
-                  (void *)(5 * sizeof(float) + (void *)cube_vertices));
-  glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex),
-                 (void *)(8 * sizeof(float) + (void *)cube_vertices));
+  glVertexPointer(3, GL_FLOAT, sizeof(FullVertex),
+                  (void *)(0 * sizeof(float) + (void *)v->vertices));
+  glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(FullVertex),
+                 (void *)(3 * sizeof(float) + (void *)v->vertices));
+  glNormalPointer(GL_FLOAT, sizeof(FullVertex),
+                  (void *)(4 * sizeof(float) + (void *)v->vertices));
+  glTexCoordPointer(2, GL_FLOAT, sizeof(FullVertex),
+                    (void *)(7 * sizeof(float) + (void *)v->vertices));
 
-  glDrawElements(GL_TRIANGLES, sizeof(cube_indices) / sizeof(uint16_t),
-                 GL_UNSIGNED_SHORT, cube_indices);
+  // is there a better way to do this than specifying the count directly?
+  glDrawElements(GL_TRIANGLES, v->num_indices, GL_UNSIGNED_SHORT, v->indices);
 
-  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(
+      GL_VERTEX_ARRAY); // do we need to disable these? we're just going to use
+                        // the same layout for most of the polys, right?
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
 
   glPopMatrix();
+}
+
+// uses a vao and ibo, unlike the sphere.
+void glprim_cube(float position[3]) { glprim_fullvtx(&cube_render, position); }
+
+void glprim_pyramid(float position[3]) {
+  glprim_fullvtx(&pyramid_render, position);
 }
