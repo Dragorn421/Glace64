@@ -1,32 +1,24 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "include/cglm/types.h"
+#include "include/physics.h"
+#include <stdint.h>
+
 #define NUM_OBJECTS 20
 
 typedef enum ObjectType { OBJ_PLAYER, OBJ_CRAB } ObjectType;
-
-// everything takes in void pointers, need to be very generic about this.
-typedef void (*InitFn)(void *); // when it's added to the objects array.
-                                // different from construction.
-typedef void (*UpdateFn)(void *);
-typedef void (*DrawFn)(void *);
-typedef void (*CleanFn)(void *); // when it's removed from the objects array.
-                                 // different from destruction.
-
-// have a LUT of ObjectFnPointers for each type of object.
-// the functions themselves are passed a void *, and trusted to cast to the
-// appropriate type.
-typedef struct ObjectFnPointers {
-  InitFn init;
-  UpdateFn update;
-  DrawFn draw;
-  CleanFn clean;
-} ObjectFnPointers;
 
 // handled in the external LUT, an object is linked to a FnPointers structure by
 // its type.
 typedef struct Object {
   ObjectType type;
+  vec3 position; // honestly it makes collision easier to assume that each
+                 // object has a position so screw it why not
+
+  Collider *colliders; // then, all the collision data for the physics engine to
+                       // run through on each object. set this to NULL if the
+                       // object has no collision data.
 } Object;
 
 typedef struct ObjectState {

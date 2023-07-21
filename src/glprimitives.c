@@ -8,11 +8,51 @@
 
 #include <GL/gl.h>
 
-#include "include/render_defines.h"
+#include "include/glprimitives.h"
 
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643
 #endif
+
+// all vertices specify a position, and are offset by that position in the
+// modelview. use a push-pop design for the function.
+void glprim_fullvtx(FullRender *v, vec3 position) {
+  glPushMatrix();
+  // don't need to do any linear algebra here, since we're using a fixed camera
+  // position for the left screen? i think?
+  glTranslatef(position[0], position[1],
+               position[2]); // translate the modelview by the right
+                             // test_entity position, locally.
+  glScalef(1.f, 1.f, 1.f);
+
+  glEnableClientState(GL_VERTEX_ARRAY); // using vaos and ibos!!
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_COLOR_ARRAY);
+
+  // the vertex structure just happens to match the vertex array layout that
+  // we're using here.
+  glVertexPointer(3, GL_FLOAT, sizeof(FullVertex),
+                  (void *)(0 * sizeof(float) + (void *)v->vertices));
+  glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(FullVertex),
+                 (void *)(3 * sizeof(float) + (void *)v->vertices));
+  glNormalPointer(GL_FLOAT, sizeof(FullVertex),
+                  (void *)(4 * sizeof(float) + (void *)v->vertices));
+  glTexCoordPointer(2, GL_FLOAT, sizeof(FullVertex),
+                    (void *)(7 * sizeof(float) + (void *)v->vertices));
+
+  // is there a better way to do this than specifying the count directly?
+  glDrawElements(GL_TRIANGLES, v->num_indices, GL_UNSIGNED_SHORT, v->indices);
+
+  glDisableClientState(
+      GL_VERTEX_ARRAY); // do we need to disable these? we're just going to use
+                        // the same layout for most of the polys, right?
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_COLOR_ARRAY);
+
+  glPopMatrix();
+}
 
 void glprim_sphere(float radius, int n_segments,
                    void (*callback)(float, int, int, int)) {
@@ -217,49 +257,9 @@ FullRender pyramid_render = {
     sizeof(pyramid_indices) / sizeof(uint16_t),
 };
 
-// all vertices specify a position, and are offset by that position in the
-// modelview. use a push-pop design for the function.
-void glprim_fullvtx(FullRender *v, float position[3]) {
-  glPushMatrix();
-  // don't need to do any linear algebra here, since we're using a fixed camera
-  // position for the left screen? i think?
-  glTranslatef(position[0], position[1],
-               position[2]); // translate the modelview by the right
-                             // test_entity position, locally.
-  glScalef(1.f, 1.f, 1.f);
-
-  glEnableClientState(GL_VERTEX_ARRAY); // using vaos and ibos!!
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_COLOR_ARRAY);
-
-  // the vertex structure just happens to match the vertex array layout that
-  // we're using here.
-  glVertexPointer(3, GL_FLOAT, sizeof(FullVertex),
-                  (void *)(0 * sizeof(float) + (void *)v->vertices));
-  glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(FullVertex),
-                 (void *)(3 * sizeof(float) + (void *)v->vertices));
-  glNormalPointer(GL_FLOAT, sizeof(FullVertex),
-                  (void *)(4 * sizeof(float) + (void *)v->vertices));
-  glTexCoordPointer(2, GL_FLOAT, sizeof(FullVertex),
-                    (void *)(7 * sizeof(float) + (void *)v->vertices));
-
-  // is there a better way to do this than specifying the count directly?
-  glDrawElements(GL_TRIANGLES, v->num_indices, GL_UNSIGNED_SHORT, v->indices);
-
-  glDisableClientState(
-      GL_VERTEX_ARRAY); // do we need to disable these? we're just going to use
-                        // the same layout for most of the polys, right?
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_COLOR_ARRAY);
-
-  glPopMatrix();
-}
-
 // uses a vao and ibo, unlike the sphere.
-void glprim_cube(float position[3]) { glprim_fullvtx(&cube_render, position); }
+void glprim_cube(vec3 position) { glprim_fullvtx(&cube_render, position); }
 
-void glprim_pyramid(float position[3]) {
+void glprim_pyramid(vec3 position) {
   glprim_fullvtx(&pyramid_render, position);
 }

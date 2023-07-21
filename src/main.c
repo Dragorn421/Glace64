@@ -13,18 +13,18 @@
 #include <GL/gl_integration.h>
 #include <GL/glu.h>
 
+#include "display.h"
 #include "include/audio.h"
+#include "include/cglm/types.h"
+#include "include/etc_math.h"
 #include "include/glprimitives.h"
 #include "include/input.h"
 #include "include/object.h"
+#include "include/physics.h"
 #include "include/splitscreen.h"
 
 // object type includes
 #include "include/objects/player.h"
-
-void callback(float radius, int n_segments, int iy, int itheta) {
-  glColor3f((float)iy / n_segments, (float)itheta / n_segments, 1.0f);
-}
 
 int main() {
   debug_init(DEBUG_FEATURE_ALL);
@@ -38,10 +38,7 @@ int main() {
                ANTIALIAS_RESAMPLE_FETCH_NEEDED);
   surface_t zbuffer =
       surface_alloc(FMT_RGBA16, display_get_width(), display_get_height());
-  float radius = 2.0f;
-  int n_segments = 5;
-  float rot_pitch = 0.0f;
-  float rot_yaw = 0.0f;
+
   uint32_t ticks_last = TICKS_READ();
 
   object_init();
@@ -63,13 +60,21 @@ int main() {
   rdpq_font_t *fnt1 = rdpq_font_load("rom:/Roboto-Bold.font64");
   debugf("fnt1 ptr: %p\n", fnt1);
 
+  physics_init();
+
   m_audio_init();
   // m_audio_change_bgm("rom:/AQUA.xm64");
 
-  struct SplitScreenArea area_left = {0, 0, -1, display_get_height()},
-                         area_right = {-1, 0, display_get_width(),
-                                       display_get_height()};
-  float area_left_right_divide_x = display_get_width() * 0.6f;
+  uint32_t screen_w, screen_h;
+  screen_w = display_get_width(); // cache these results. i don't think the
+                                  // compiler will do that automatically? i
+                                  // think a function call is too difficult to
+                                  // statically analyse in most cases?
+  screen_h = display_get_height();
+
+  struct SplitScreenArea area_left = {0, 0, -1, screen_h},
+                         area_right = {-1, 0, screen_w, screen_h};
+  float area_left_right_divide_x = screen_w * 0.6f;
 
   while (true) {
     // get delta before anything else.
@@ -80,6 +85,7 @@ int main() {
 
     // then, grab the input before we try to access old data.
     input_update();
+    physics_update();
     object_update(); // update after the inputs have been processed.
 
     // draw after the objects have updated, don't draw old state.
@@ -123,8 +129,12 @@ int main() {
 
       // reuse the previous transform but with an additional rotation in between
       glMatrixMode(GL_MODELVIEW);
-      glRotatef(90, 1, 0, 0);
-      glprim_sphere(radius, n_segments, callback);
+      glLoadIdentity(); // use a different one for the other screen.
+      glprim_pyramid((vec3){0, 0, -20.0F});
+
+      glprim_pyramid((vec3){-5.0F, 2.0F, -25.0F});
+
+      glprim_pyramid((vec3){-1.0F, -5.0F, -30.0F});
 
       // reset the viewport and scissoring (impacts later rdpq_font calls
       // otherwise)
@@ -147,22 +157,14 @@ int main() {
                         // every rendering pass.
 
     {
-      float rotspeed_yaw = 360; // degrees per second
-      float rotspeed_pitch = 360;
-
-      rot_yaw += input_state.left.pressed.x * seconds_elapsed * rotspeed_yaw;
-      rot_pitch +=
-          input_state.left.pressed.y * seconds_elapsed * rotspeed_pitch;
-
-      if (input_state.left.down.C_up)
-        n_segments++;
-      if (input_state.left.down.C_down)
-        n_segments--;
-
       // move the divide between the left and right areas using C left/right
       if (input_state.left.pressed.C_left || input_state.left.pressed.C_right)
         area_left_right_divide_x +=
             (input_state.left.pressed.C_left ? -1 : 1) * 50 * seconds_elapsed;
+
+      area_left_right_divide_x =
+          clamp(area_left_right_divide_x, screen_w * SPLIT_MIN_PERCENT,
+                screen_w * SPLIT_MAX_PERCENT);
 
       if (input_state.left.down.C_down)
         object_remove_by_ptr(player_obj);
@@ -172,5 +174,6 @@ int main() {
   }
 
   m_audio_clean();
+  physics_clean();
   object_clean();
 }

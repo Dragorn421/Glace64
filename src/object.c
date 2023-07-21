@@ -1,27 +1,12 @@
 #include "include/object.h"
 
+#include "include/object_lut.h"
 #include "include/objects/player.h"
+#include "include/physics.h"
 
 #include <libdragon.h>
 #include <signal.h>
 #include <stddef.h>
-
-// null function that does nothing with the void pointer arg.
-// doesn't miss the cache since the none() function is declared right above the
-// lookup array and switch?
-void none(void *v) {}
-
-#define TODO                                                                   \
-  { none, none, none, none }
-
-// define the actual LUT object.
-ObjectFnPointers fn_lut[] = {
-    // for example, we'll do fn_lut[o->type].update(o); to call the update
-    // function. minimize icache misses by deferring behavior to different
-    // functions, rather than inlining in a huge switch.
-    [OBJ_PLAYER] = {player_init, player_update, player_draw, player_clean},
-    [OBJ_CRAB] = TODO,
-};
 
 ObjectState object_state = {
     {0}}; // zero alloc the object pointer array to start off with.

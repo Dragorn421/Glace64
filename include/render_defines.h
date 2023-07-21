@@ -1,10 +1,11 @@
 #ifndef RENDER_DEFINES_H
 #define RENDER_DEFINES_H
 
+#include "include/cglm/types.h"
 #include <stdint.h>
 
 typedef struct {
-  float position[3];
+  vec3 position;
   uint32_t color;
 } BasicVertex;
 
@@ -16,7 +17,7 @@ typedef struct BasicRender {
 typedef struct { // use a gl-vertex layout oriented structure, rather than the
                  // normal ultra64.h Vtx union structure. this is actually the
                  // same layout as Vtx_n? probably not a coincidence?
-  float position[3];
+  vec3 position;
   uint32_t color;
   float texcoord[2];
   float normal[3];
