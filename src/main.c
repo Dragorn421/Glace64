@@ -24,11 +24,17 @@
 #include "include/splitscreen.h"
 
 // object type includes
+#include "include/audio/mp3.h"
+#include "include/audio/simple_sinewave.h"
 #include "include/objects/player.h"
+#include "mixer.h"
 
 int main() {
   debug_init(DEBUG_FEATURE_ALL);
   debugf("hello world!\n");
+
+  m_audio_init();
+
   rdpq_init();
 
   input_init();
@@ -57,13 +63,13 @@ int main() {
     dfs_init(DFS_DEFAULT_LOCATION);
   }
 
+  // waveform_t *sinewave = play_sinewave(0, 31100.0F, 10000);
+  waveform_t *bgm = play_mp3("rom:/theme_a_compressed.mp3", 0);
+
   rdpq_font_t *fnt1 = rdpq_font_load("rom:/Roboto-Bold.font64");
   debugf("fnt1 ptr: %p\n", fnt1);
 
   physics_init();
-
-  m_audio_init();
-  // m_audio_change_bgm("rom:/AQUA.xm64");
 
   uint32_t screen_w, screen_h;
   screen_w = display_get_width(); // cache these results. i don't think the
@@ -172,6 +178,9 @@ int main() {
 
     m_audio_update();
   }
+
+  // free(sinewave);
+  free(bgm);
 
   m_audio_clean();
   physics_clean();

@@ -18,6 +18,7 @@ typedef struct AudioState {
   int numbuffers;
   int num_channels;
   Song curr_bgm;
+
 } AudioState;
 
 extern AudioState audio_state;

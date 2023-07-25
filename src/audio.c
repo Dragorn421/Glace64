@@ -1,4 +1,6 @@
 #include "include/audio.h"
+#include "audio.h"
+#include "include/audio/mp3.h"
 
 #include <stdlib.h>
 
@@ -15,6 +17,8 @@ AudioState as = {
     },
 };
 
+#define BUFFER_SIZE 100000
+
 static bool strendswith(const char *str, const char *suffix) {
   char *p = strstr(str, suffix);
   return p && p[strlen(suffix)] == '\0';
@@ -22,25 +26,16 @@ static bool strendswith(const char *str, const char *suffix) {
 
 // lifetime module functions
 void m_audio_init() {
-  audio_init(44100, 4);
-  mixer_init(32);
+  audio_init(as.frequency, as.numbuffers);
+  mixer_init(as.num_channels); // do we really need this many?
 }
 
 static void update_single_track(Song s) {
+  // i have no idea what this means
   if (TICKS_DISTANCE(s.start_play_loop, TICKS_READ()) < TICKS_PER_SECOND) {
     s.is_active = false;
     return;
   }
-
-  extern int64_t __mixer_profile_rsp, __wav64_profile_dma;
-  __mixer_profile_rsp = __wav64_profile_dma = 0;
-
-  while (!audio_can_write()) {
-  }
-
-  int16_t *out = audio_write_begin();
-  mixer_poll(out, s.audiosz);
-  audio_write_end();
 }
 
 void m_audio_update() { // audio processing loop, write the audio to the rsp.
@@ -50,6 +45,17 @@ void m_audio_update() { // audio processing loop, write the audio to the rsp.
     debugf("song updating: addr %p, at path %s, with audiosz %d.\n",
            &as.curr_bgm, as.curr_bgm.song_path, as.curr_bgm.audiosz);
     update_single_track(as.curr_bgm);
+  }
+
+  // update the pcm buffer of the mp3 decoder.
+  mp3_update();
+
+  //// generally just pop through the audio stack and process stuff here
+  // if it can't write, just wait until next frame?
+  if (audio_can_write()) {
+    short *buf = audio_write_begin();
+    mixer_poll(buf, audio_get_buffer_length());
+    audio_write_end();
   }
 }
 

@@ -5,6 +5,7 @@
 
 #include <math.h>
 
+int min(int a, int b);
 float clamp(float value, float min, float max);
 
 #endif // !ETC_MATH_H

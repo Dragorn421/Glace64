@@ -18,7 +18,7 @@ include $(N64_INST)/include/n64.mk
 all: $(ROMNAME).z64
 .PHONY: all
 
-C_FILES = $(shell cd src && find . -name '*.c')
+C_FILES = $(shell cd src && find . -name '*.c') 
 OBJS = $(addprefix $(BUILD_DIR)/,$(C_FILES:.c=.o))
 
 #maybe pull asset conversion into its own makefile somehow?
@@ -35,10 +35,14 @@ assets_xm1 = $(wildcard assets/*.xm)
 assets_xm2 = $(wildcard assets/*.XM)
 assets_ym1 = $(wildcard assets/*.ym)
 assets_ym2 = $(wildcard assets/*.YM)
+
+assets_mp3 = $(wildcard assets/*.mp3)
+
 audio_assets_conv = $(addprefix $(FILESYSTEM)/,$(notdir $(assets_xm1:%.xm=%.xm64))) \
               $(addprefix $(FILESYSTEM)/,$(notdir $(assets_xm2:%.XM=%.xm64))) \
               $(addprefix $(FILESYSTEM)/,$(notdir $(assets_ym1:%.ym=%.ym64))) \
-              $(addprefix $(FILESYSTEM)/,$(notdir $(assets_ym2:%.YM=%.ym64)))
+              $(addprefix $(FILESYSTEM)/,$(notdir $(assets_ym2:%.YM=%.ym64))) \
+              $(addprefix $(FILESYSTEM)/,$(notdir $(assets_mp3:%.mp3=%.mp3)))
 
 # Run audioconv64 on all XM/YM files under assets/
 # We do this file by file, but we could even do it just once for the whole
@@ -61,6 +65,10 @@ $(FILESYSTEM)/%.ym64: assets/%.YM
 	@echo "    [AUDIO] $@"
 	$(N64_AUDIOCONV) $(AUDIOCONV_FLAGS) -o $(FILESYSTEM) "$<"
 
+$(FILESYSTEM)/%.mp3: assets/%.mp3
+	@mkdir -p $(dir $@)
+	@echo "    [AUDIO] $@"
+	cp $< $@
 
 ## CONvERT FONT ASSETS
 MKFONT_FLAGS ?=
@@ -86,7 +94,8 @@ $(FILESYSTEM)/%.sprite: assets/%.png
 	@$(N64_MKSPRITE) $(MKSPRITE_FLAGS) -o $(FILESYSTEM) "$<"
 
 
-$(OBJS): CFLAGS += -I.
+# the helix includes, to help helix compile.
+$(OBJS): CFLAGS += -I. -Isrc/deps/helix/pub
 
 $(BUILD_DIR)/$(ROMNAME).dfs: $(image_assets_conv) $(audio_assets_conv) $(font_assets_conv)
 $(BUILD_DIR)/$(ROMNAME).elf: $(OBJS)
