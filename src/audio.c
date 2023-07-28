@@ -21,7 +21,7 @@ static bool strendswith(const char *str, const char *suffix) {
 }
 
 // lifetime module functions
-void m_audio_init() {
+void m_audio_init(void) {
   audio_init(44100, 4);
   mixer_init(32);
 }
@@ -43,7 +43,7 @@ static void update_single_track(Song s) {
   audio_write_end();
 }
 
-void m_audio_update() { // audio processing loop, write the audio to the rsp.
+void m_audio_update(void) { // audio processing loop, write the audio to the rsp.
   if (as.curr_bgm.is_active) { // i'm not sure how many tracks we need
                                // concurrently, i'm just using the one bgm track
                                // now but more could be added to the structure.
@@ -53,7 +53,7 @@ void m_audio_update() { // audio processing loop, write the audio to the rsp.
   }
 }
 
-void m_audio_clean() {}
+void m_audio_clean(void) {}
 
 // then exposed helper functions for the audio subsystem.
 void m_audio_change_bgm(const char *song_path) {

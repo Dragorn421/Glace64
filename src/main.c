@@ -17,6 +17,7 @@
 #include "include/glprimitives.h"
 #include "include/input.h"
 #include "include/object.h"
+#include "include/physics.h"
 #include "include/splitscreen.h"
 
 // object type includes
@@ -42,10 +43,9 @@ int main() {
   int n_segments = 5;
   float rot_pitch = 0.0f;
   float rot_yaw = 0.0f;
-  uint32_t ticks_last = TICKS_READ();
 
   object_init();
-  Object *player_obj = object_add((Object *)player_build());
+  Object *player_obj = object_add((Object *)player_build(&input_state.left));
 
   { // setup mats
     glMatrixMode(GL_PROJECTION);
@@ -71,12 +71,11 @@ int main() {
                                        display_get_height()};
   float area_left_right_divide_x = display_get_width() * 0.6f;
 
+  physics_reset_tick();
+
   while (true) {
-    // get delta before anything else.
-    uint32_t ticks_now = TICKS_READ();
-    uint32_t ticks_elapsed = TICKS_DISTANCE(ticks_last, ticks_now);
-    ticks_last = ticks_now;
-    float seconds_elapsed = (float)ticks_elapsed / TICKS_PER_SECOND;
+    physics_next_tick(); // TODO not sure where this should go exactly
+                         // (here seems fine for now)
 
     // then, grab the input before we try to access old data.
     input_update();
@@ -133,9 +132,9 @@ int main() {
       gl_context_end();
     }
 
-    { // font loop, the gl loop clears the cfb, so draw text after.
+    { // font block, the gl block clears the cfb, so draw text after.
       char fps_str[256];
-      sprintf(fps_str, "DELTA: %02f", seconds_elapsed);
+      sprintf(fps_str, "DELTA: %02f", tick_seconds);
       rdpq_font_begin(
           RGBA32(0xED, 0xAE, 0x49, 0xFF)); // gl immediate-mode like syntax for
                                            // drawing font on the screen.
@@ -150,9 +149,8 @@ int main() {
       float rotspeed_yaw = 360; // degrees per second
       float rotspeed_pitch = 360;
 
-      rot_yaw += input_state.left.pressed.x * seconds_elapsed * rotspeed_yaw;
-      rot_pitch +=
-          input_state.left.pressed.y * seconds_elapsed * rotspeed_pitch;
+      rot_yaw += input_state.left.pressed.x * tick_seconds * rotspeed_yaw;
+      rot_pitch += input_state.left.pressed.y * tick_seconds * rotspeed_pitch;
 
       if (input_state.left.down.C_up)
         n_segments++;
@@ -162,7 +160,7 @@ int main() {
       // move the divide between the left and right areas using C left/right
       if (input_state.left.pressed.C_left || input_state.left.pressed.C_right)
         area_left_right_divide_x +=
-            (input_state.left.pressed.C_left ? -1 : 1) * 50 * seconds_elapsed;
+            (input_state.left.pressed.C_left ? -1 : 1) * 50 * tick_seconds;
 
       if (input_state.left.down.C_down)
         object_remove_by_ptr(player_obj);

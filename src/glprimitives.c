@@ -9,10 +9,7 @@
 #include <GL/gl.h>
 
 #include "include/render_defines.h"
-
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643
-#endif
+#include "include/ourmath.h"
 
 void glprim_sphere(float radius, int n_segments,
                    void (*callback)(float, int, int, int)) {
