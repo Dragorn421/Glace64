@@ -28,7 +28,7 @@ typedef struct InputState {
 
 extern InputState input_state;
 
-void input_init();
-void input_update();
+void input_init(void);
+void input_update(void);
 
 #endif // !INPUT_H

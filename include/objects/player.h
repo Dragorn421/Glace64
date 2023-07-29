@@ -6,6 +6,7 @@
 #include "include/object_lut.h"
 
 #include "include/cglm/types.h"
+#include "include/input.h"
 #include "include/object.h"
 #include "include/physics.h"
 
@@ -18,10 +19,11 @@ typedef struct Player {
   uint8_t num_colliders;
   Collider *colliders;
 
-  float speed;
+  PlayerInput *input;
+  float speed; // units per second
 } Player;
 
-Player *player_build();
+Player *player_build(PlayerInput *input);
 void player_destroy(Player *p);
 
 void player_init(void *p);

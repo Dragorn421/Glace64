@@ -14,7 +14,7 @@
 
 // use the dummy as the default entity, just for the initial setup of the object
 // pipeline in the game.
-Player *player_build() {
+Player *player_build(PlayerInput *input) {
   Player *p = (Player *)malloc(sizeof(Player));
   memcpy(p->position, (vec3){0, -0.9F, 0},
          sizeof(float) * 3); // copy the literal from the stack.
@@ -24,6 +24,7 @@ Player *player_build() {
   p->colliders[0].type = CL_PILLAR;
   p->type = OBJ_PLAYER;
   p->speed = 0.3F;
+  p->input = input;
   return p;
 }
 
@@ -32,17 +33,19 @@ void player_init(void *p) {}
 void player_update(void *p) {
   // trust the caller themselves to pass the right type.
   Player *player = (Player *)p;
-  float x = input_state.left.pressed.x;
-  float y = input_state.left.pressed.y;
+  float x = player->input->pressed.x;
+  float y = player->input->pressed.y;
 
-  player->position[0] += x * player->speed;
-  player->position[2] -= y * player->speed;
+  player->position[0] += x * player->speed * tick_seconds;
+  player->position[2] -= y * player->speed * tick_seconds;
 }
 
-void player_draw(void *p) { // always draw at the same place, modify position
-                            // through matrices in the rendering pipeline.
+void player_draw(void *p) {
   Player *player = (Player *)p;
-  glprim_cube(player->position);
+  glprim_cube(
+      player->position); // the position will be interpreted as a translation on
+                         // the modelview matrix before rendering, therefore
+                         // offsetting the player properly.
 }
 
 void player_handle_collision(void *p, CollisionEvent *e) {

@@ -36,9 +36,9 @@ extern ObjectState object_state;
 Object *object_add(Object *o);
 void object_remove_by_ptr(Object *o);
 
-void object_init();
-void object_update();
-void object_draw();
-void object_clean();
+void object_init(void);
+void object_update(void);
+void object_draw(void);
+void object_clean(void);
 
 #endif // !OBJECT_H

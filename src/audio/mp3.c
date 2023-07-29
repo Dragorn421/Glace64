@@ -1,5 +1,5 @@
 #include "include/audio/mp3.h"
-#include "include/etc_math.h"
+#include "include/ourmath.h"
 #include "include/util.h"
 #include "mixer.h"
 #include <stdint.h>
@@ -9,8 +9,6 @@
 
 #define MINIMP3_IMPLEMENTATION
 #include "include/deps/minimp3_ex.h"
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 // how much we'll store in the pcm buffer to prevent audio buffering as it's
 // loading in real time.

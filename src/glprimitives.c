@@ -10,9 +10,8 @@
 
 #include "include/glprimitives.h"
 
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643
-#endif
+#include "include/ourmath.h"
+#include "include/render_defines.h"
 
 // all vertices specify a position, and are offset by that position in the
 // modelview. use a push-pop design for the function.

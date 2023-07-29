@@ -23,9 +23,9 @@ typedef struct AudioState {
 
 extern AudioState audio_state;
 
-void m_audio_init();
-void m_audio_update();
-void m_audio_clean();
+void m_audio_init(void);
+void m_audio_update(void);
+void m_audio_clean(void);
 void m_audio_change_bgm(const char *song_path);
 
 #endif // AUDIO_H

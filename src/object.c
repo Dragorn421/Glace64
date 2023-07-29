@@ -23,9 +23,8 @@ Object *object_add(Object *o) {
     }
   }
 
-  debugf("Ran out of Object slots in the objects array!");
-  assert(0 == 1); // is there a better way to "panic" and throw a proper error
-                  // in libdragon?
+  assertf(false, "Ran out of Object slots in the objects array!");
+
   return NULL;
 }
 
@@ -49,11 +48,11 @@ void object_remove_by_ptr(Object *o) {
 
 // just init the objectstate. calling the init lifecycle method should happen in
 // the object_add function.
-void object_init() {}
+void object_init(void) {}
 
 // main lifecycle loops that call every other sub-lifecycle function in each
 // object.
-void object_update() {
+void object_update(void) {
   for (int i = 0; i < NUM_OBJECTS; i++) {
     Object *o = object_state.objects[i];
     if (o != NULL) {
@@ -62,7 +61,7 @@ void object_update() {
   }
 }
 
-void object_draw() {
+void object_draw(void) {
   for (int i = 0; i < NUM_OBJECTS; i++) {
     Object *o = object_state.objects[i];
     if (o != NULL) {
@@ -73,4 +72,4 @@ void object_draw() {
 
 // again, this doesn't call the function, it cleans up the overall ObjectState
 // subsystem.
-void object_clean() {}
+void object_clean(void) {}
