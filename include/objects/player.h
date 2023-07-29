@@ -15,6 +15,7 @@ typedef struct Player {
                    // down to an Object, so it needs to look the same, at least
                    // in the first matching bytes.
   vec3 position;
+  uint8_t num_colliders;
   Collider *colliders;
 
   float speed;

@@ -1,5 +1,8 @@
 #include "include/object_lut.h"
 
+#include "include/object.h"
+#include "include/objects/cube.h"
+#include "include/objects/floor.h"
 #include "include/objects/player.h"
 
 // do-nothing table functions. used as placeholders.
@@ -17,5 +20,10 @@ ObjectFnPointers fn_lut[] = {
     [OBJ_PLAYER] =
         {player_init, player_update, player_draw, player_clean,
          player_handle_collision}, // register event handler functions here too.
+    [OBJ_CUBE] =
+        {cube_init, cube_update, cube_draw, cube_clean,
+         cube_handle_collision}, // register event handler functions here too.
+    [OBJ_FLOOR] = {none, none, none, floor_clean,
+                   none_col}, // register event handler functions here too.
     [OBJ_CRAB] = TODO,
 };

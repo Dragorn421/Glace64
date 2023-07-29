@@ -18,6 +18,7 @@ Player *player_build() {
   Player *p = (Player *)malloc(sizeof(Player));
   memcpy(p->position, (vec3){0, -0.9F, 0},
          sizeof(float) * 3); // copy the literal from the stack.
+  p->num_colliders = 1;
   p->colliders =
       (Collider *)malloc(sizeof(Collider) * 1); // space for one collider.
   p->colliders[0].type = CL_PILLAR;
@@ -46,9 +47,8 @@ void player_draw(void *p) { // always draw at the same place, modify position
 
 void player_handle_collision(void *p, CollisionEvent *e) {
   Player *player = (Player *)p;
-  // just respond in the opposite direction.
-  glm_vec3_scale(e->normal, e->magnitude, e->normal);
-  glm_vec3_add(player->position, e->normal, player->position);
+  glm_vec3_scale(e->normalized_force, e->magnitude, e->normalized_force);
+  glm_vec3_add(player->position, e->normalized_force, player->position);
 }
 
 // maybe don't have a seperate destructor? is there a point to that?

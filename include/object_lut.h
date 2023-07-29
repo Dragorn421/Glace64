@@ -18,8 +18,8 @@ typedef struct CollisionEvent { // contains all the data sent to an entity from
 
   uint16_t id; // id, based on the index of the objects array.
 
-  vec3 normal; // encode the data of where the object was pushed from, and how
-               // far the push should be.
+  vec3 normalized_force; // encode the data of where the object was pushed from,
+                         // and how far the push should be.
   float magnitude;
 } CollisionEvent;
 

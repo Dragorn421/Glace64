@@ -20,6 +20,8 @@
 #include "include/glprimitives.h"
 #include "include/input.h"
 #include "include/object.h"
+#include "include/objects/cube.h"
+#include "include/objects/floor.h"
 #include "include/physics.h"
 #include "include/splitscreen.h"
 
@@ -49,6 +51,8 @@ int main() {
 
   object_init();
   Object *player_obj = object_add((Object *)player_build());
+  object_add((Object *)cube_build((vec3){0, -0.9F, 0.7f}));
+  object_add((Object *)floor_build(0));
 
   { // setup mats
     glMatrixMode(GL_PROJECTION);
@@ -64,7 +68,7 @@ int main() {
   }
 
   // waveform_t *sinewave = play_sinewave(0, 31100.0F, 10000);
-  waveform_t *bgm = play_mp3("rom:/theme_a_compressed.mp3", 0);
+  // waveform_t *bgm = play_mp3("rom:/theme_a_compressed.mp3", 0);
 
   rdpq_font_t *fnt1 = rdpq_font_load("rom:/Roboto-Bold.font64");
   debugf("fnt1 ptr: %p\n", fnt1);
@@ -180,7 +184,7 @@ int main() {
   }
 
   // free(sinewave);
-  free(bgm);
+  // free(bgm);
 
   m_audio_clean();
   physics_clean();
