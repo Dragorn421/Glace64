@@ -198,7 +198,7 @@ int main() {
   }
 
   // free(sinewave);
-  // free(bgm);
+  free(bgm);
 
   m_audio_clean();
   physics_clean();
