@@ -12,10 +12,11 @@
 
 PhysicsState physics_state = {}; // dummy for now.
 
-void physics_init() {}
+void physics_init(ObjectState *object_state) {}
 
-void physics_update() { // for now, this just runs through collision, and emits
-                        // messages to the proper gameobjects.
+void physics_update(ObjectState *object_state) { // for now, this just runs
+                                                 // through collision, and emits
+  // messages to the proper gameobjects.
   int i, j;
 
   uint8_t is_invalid[NUM_OBJECTS] = {0};
@@ -24,7 +25,7 @@ void physics_update() { // for now, this just runs through collision, and emits
     if (is_invalid[i])
       continue;
 
-    Object *base_obj = object_state.objects[i];
+    Object *base_obj = object_state->objects[i];
     if (base_obj == NULL) {
       is_invalid[i] = 1;
       continue;
@@ -44,7 +45,7 @@ void physics_update() { // for now, this just runs through collision, and emits
       if (i == j)
         continue;
 
-      Object *target_obj = object_state.objects[i];
+      Object *target_obj = object_state->objects[i];
       if (target_obj == NULL)
         continue;
 
@@ -97,8 +98,10 @@ void physics_update() { // for now, this just runs through collision, and emits
   }
 }
 
-void physics_clean() {}
+void physics_clean(ObjectState *object_state) {}
 
+// i don't think these methods are object_state screen-specific? i'm just not
+// going to give them an ObjectState* parameter for now.
 float tick_seconds;
 int tick_microseconds;
 

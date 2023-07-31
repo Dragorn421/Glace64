@@ -53,15 +53,18 @@ int main() {
   surface_t zbuffer =
       surface_alloc(FMT_RGBA16, display_get_width(), display_get_height());
 
-  object_init();
+  object_init(&left_objects);
+  object_init(&right_objects);
 
-  object_add((Object *)cube_build((vec3){0, -0.9F, 0.7f}));
-  object_add((Object *)floor_build(0));
+  // setup left objects
+  object_add(&left_objects, (Object *)cube_build((vec3){0, -0.9F, 0.7f}));
+  object_add(&left_objects, (Object *)floor_build(0));
+  Object *player_obj =
+      object_add(&left_objects, (Object *)player_build(&input_state.left));
 
-  Object *player_obj = object_add((Object *)player_build(&input_state.left));
-  Object *sphere_obj =
-      object_add((Object *)objectsphere_build(&input_state.right));
-  //((ObjectSphere *)sphere_obj)->radius = 4;
+  // setup right objects
+  Object *sphere_obj = object_add(
+      &right_objects, (Object *)objectsphere_build(&input_state.right));
 
   { // setup mats
     glMatrixMode(GL_PROJECTION);
@@ -82,7 +85,8 @@ int main() {
   rdpq_font_t *fnt1 = rdpq_font_load("rom:/Roboto-Bold.font64");
   debugf("fnt1 ptr: %p\n", fnt1);
 
-  physics_init();
+  physics_init(&left_objects);
+  physics_init(&right_objects);
 
   uint32_t screen_w, screen_h;
   screen_w = display_get_width(); // cache these results. i don't think the
@@ -108,8 +112,13 @@ int main() {
 
     // then, grab the input before we try to access old data.
     input_update();
-    physics_update();
-    object_update(); // update after the inputs have been processed.
+    physics_update(&left_objects);
+    physics_update(&right_objects);
+
+    // update both at the same time? i don't see why order would matter in the
+    // update for now.
+    object_update(&left_objects);
+    object_update(&right_objects);
 
     // draw after the objects have updated, don't draw old state.
 
@@ -137,12 +146,7 @@ int main() {
       glLoadIdentity();
       gluLookAt(0, 0, 5, 0, 0, 0, 0, 1, 0);
 
-      object_draw(); // when should this be called? how can we control the
-                     // drawing context that the object is drawn in? this needs
-                     // some more thought put into it. maybe the draw()
-                     // lifecycle method takes in a DrawContext structure? how
-                     // can we control which SCREEN it's drawn on, in
-                     // particular? (for now, draw to the left.)
+      object_draw(&left_objects);
 
       // draw to the right area
       splitscreen_area_activate(&area_right);
@@ -159,7 +163,7 @@ int main() {
 
       glprim_pyramid((vec3){-1.0F, -5.0F, -30.0F});
 
-      // TODO draw right objects?
+      object_draw(&right_objects);
 
       // reset the viewport and scissoring (impacts later rdpq_font calls
       // otherwise)
@@ -214,18 +218,21 @@ int main() {
                 screen_w * SPLIT_MAX_PERCENT);
 
       if (input_state.global.down.C_down)
-        object_remove_by_ptr(player_obj);
+        object_remove_by_ptr(&left_objects, player_obj);
       if (input_state.global.down.C_up)
-        object_remove_by_ptr(sphere_obj);
+        object_remove_by_ptr(&right_objects, sphere_obj);
     }
 
     m_audio_update();
   }
 
   // free(sinewave);
-  free(bgm);
+  // free(bgm);
 
   m_audio_clean();
-  physics_clean();
-  object_clean();
+  physics_clean(&left_objects);
+  physics_clean(&right_objects);
+
+  object_clean(&left_objects);
+  object_clean(&right_objects);
 }
