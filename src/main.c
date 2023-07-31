@@ -15,6 +15,7 @@
 
 #include "display.h"
 #include "include/audio.h"
+#include "include/camera.h"
 #include "include/cglm/types.h"
 #include "include/glprimitives.h"
 #include "include/input.h"
@@ -144,7 +145,8 @@ int main() {
 
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
-      gluLookAt(0, 0, 5, 0, 0, 0, 0, 1, 0);
+
+      camera_left();
 
       object_draw(&left_objects);
 
@@ -156,7 +158,10 @@ int main() {
 
       // reuse the previous transform but with an additional rotation in between
       glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity(); // use a different one for the other screen.
+      glLoadIdentity();
+
+      camera_right();
+
       glprim_pyramid((vec3){0, 0, -20.0F});
 
       glprim_pyramid((vec3){-5.0F, 2.0F, -25.0F});

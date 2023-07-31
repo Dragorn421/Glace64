@@ -1,5 +1,4 @@
 #include "include/object.h"
-
 #include "include/object_lut.h"
 #include "include/physics_colliders.h"
 
