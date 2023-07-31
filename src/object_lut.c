@@ -4,13 +4,13 @@
 #include "include/objects/cube.h"
 #include "include/objects/floor.h"
 #include "include/objects/player.h"
+#include "include/objects/sphere.h"
 
 // do-nothing table functions. used as placeholders.
-void none(void *v) {}
-void none_col(void *v, CollisionEvent *e) {}
+void noop() {}
 
 #define TODO                                                                   \
-  { none, none, none, none, none_col }
+  { noop, noop, noop, noop, noop }
 
 // define the actual LUT object.
 ObjectFnPointers fn_lut[] = {
@@ -23,7 +23,9 @@ ObjectFnPointers fn_lut[] = {
     [OBJ_CUBE] =
         {cube_init, cube_update, cube_draw, cube_clean,
          cube_handle_collision}, // register event handler functions here too.
-    [OBJ_FLOOR] = {none, none, none, floor_clean,
-                   none_col}, // register event handler functions here too.
+    [OBJ_FLOOR] = {noop, noop, noop, floor_clean,
+                   noop}, // register event handler functions here too.
     [OBJ_CRAB] = TODO,
+    [OBJ_SPHERE] = {objectsphere_init, objectsphere_update, objectsphere_draw,
+                    objectsphere_clean, noop},
 };

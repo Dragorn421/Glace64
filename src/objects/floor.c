@@ -14,13 +14,13 @@
 
 Floor *floor_build(float y_pos) {
   Floor *f = (Floor *)malloc(sizeof(Floor));
-  memcpy(f->position, (vec3){0, y_pos, 0},
+  memcpy(f->o.position, (vec3){0, y_pos, 0},
          sizeof(float) * 3); // copy the literal from the stack.
-  f->num_colliders = 1;
-  f->colliders =
+  f->o.num_colliders = 1;
+  f->o.colliders =
       (Collider *)malloc(sizeof(Collider) * 1); // space for one collider.
-  f->colliders[0].type = CL_FLOOR;
-  f->type = OBJ_FLOOR;
+  f->o.colliders[0].type = CL_FLOOR;
+  f->o.type = OBJ_FLOOR;
   return f;
 }
 

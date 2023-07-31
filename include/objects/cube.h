@@ -8,10 +8,7 @@
 #include "include/physics.h"
 
 typedef struct Cube {
-  ObjectType type;
-  vec3 position;
-  uint8_t num_colliders;
-  Collider *colliders;
+  Object o;
 
   float speed;
 } Cube;

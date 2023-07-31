@@ -1,7 +1,6 @@
 #include "include/object.h"
 
 #include "include/object_lut.h"
-#include "include/objects/player.h"
 #include "include/physics.h"
 
 #include <libdragon.h>
@@ -9,7 +8,7 @@
 #include <stddef.h>
 
 ObjectState object_state = {
-    {0}}; // zero alloc the object pointer array to start off with.
+    0}; // zero alloc the object pointer array to start off with.
 
 // return the pointer as a formality, since the caller will need that to use
 // remove_by_ptr on the objects array through this interface.

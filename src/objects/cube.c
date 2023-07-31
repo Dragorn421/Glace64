@@ -14,13 +14,13 @@
 
 Cube *cube_build(vec3 position) {
   Cube *c = (Cube *)malloc(sizeof(Cube));
-  memcpy(c->position, position,
+  memcpy(c->o.position, position,
          sizeof(float) * 3); // copy the literal from the stack.
-  c->num_colliders = 1;
-  c->colliders =
+  c->o.num_colliders = 1;
+  c->o.colliders =
       (Collider *)malloc(sizeof(Collider) * 1); // space for one collider.
-  c->colliders[0].type = CL_PILLAR;
-  c->type = OBJ_CUBE;
+  c->o.colliders[0].type = CL_PILLAR;
+  c->o.type = OBJ_CUBE;
   c->speed = 0.3F;
   return c;
 }
@@ -32,13 +32,13 @@ void cube_update(void *c) {}
 void cube_draw(void *c) { // always draw at the same place, modify position
                           // through matrices in the rendering pipeline.
   Cube *cube = (Cube *)c;
-  glprim_cube(cube->position);
+  glprim_cube(cube->o.position);
 }
 
 void cube_handle_collision(void *c, CollisionEvent *e) {
   Cube *cube = (Cube *)c;
   glm_vec3_scale(e->normalized_force, e->magnitude, e->normalized_force);
-  glm_vec3_add(cube->position, e->normalized_force, cube->position);
+  glm_vec3_add(cube->o.position, e->normalized_force, cube->o.position);
 }
 
 // maybe don't have a separate destructor? is there a point to that?
