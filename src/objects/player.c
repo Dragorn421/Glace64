@@ -16,13 +16,13 @@
 // pipeline in the game.
 Player *player_build(PlayerInput *input) {
   Player *p = (Player *)malloc(sizeof(Player));
-  memcpy(p->position, (vec3){0, -0.9F, 0},
+  memcpy(p->o.position, (vec3){0, -0.9F, 0},
          sizeof(float) * 3); // copy the literal from the stack.
-  p->num_colliders = 1;
-  p->colliders =
+  p->o.num_colliders = 1;
+  p->o.colliders =
       (Collider *)malloc(sizeof(Collider) * 1); // space for one collider.
-  p->colliders[0].type = CL_PILLAR;
-  p->type = OBJ_PLAYER;
+  p->o.colliders[0].type = CL_PILLAR;
+  p->o.type = OBJ_PLAYER;
   p->speed = 0.3F;
   p->input = input;
   return p;
@@ -36,22 +36,22 @@ void player_update(void *p) {
   float x = player->input->pressed.x;
   float y = player->input->pressed.y;
 
-  player->position[0] += x * player->speed * tick_seconds;
-  player->position[2] -= y * player->speed * tick_seconds;
+  player->o.position[0] += x * player->speed * tick_seconds;
+  player->o.position[2] -= y * player->speed * tick_seconds;
 }
 
 void player_draw(void *p) {
   Player *player = (Player *)p;
   glprim_cube(
-      player->position); // the position will be interpreted as a translation on
-                         // the modelview matrix before rendering, therefore
-                         // offsetting the player properly.
+      player->o.position); // the position will be interpreted as a translation
+                           // on the modelview matrix before rendering,
+                           // therefore offsetting the player properly.
 }
 
 void player_handle_collision(void *p, CollisionEvent *e) {
   Player *player = (Player *)p;
   glm_vec3_scale(e->normalized_force, e->magnitude, e->normalized_force);
-  glm_vec3_add(player->position, e->normalized_force, player->position);
+  glm_vec3_add(player->o.position, e->normalized_force, player->o.position);
 }
 
 // maybe don't have a seperate destructor? is there a point to that?

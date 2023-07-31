@@ -8,10 +8,7 @@
 #include "include/physics.h"
 
 typedef struct Floor {
-  ObjectType type;
-  vec3 position;
-  uint8_t num_colliders;
-  Collider *colliders;
+  Object o;
 } Floor;
 
 Floor *floor_build(float y_pos);

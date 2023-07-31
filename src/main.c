@@ -27,11 +27,15 @@
 #include "include/physics.h"
 #include "include/splitscreen.h"
 
-// object type includes
 #include "include/audio/mp3.h"
 #include "include/audio/simple_sinewave.h"
-#include "include/objects/player.h"
 #include "mixer.h"
+
+// object type includes
+#include "include/objects/player.h"
+#include "include/objects/sphere.h"
+
+int wip_cur_control_part = CONTROLPART_LEFT;
 
 int main() {
   debug_init(DEBUG_FEATURE_ALL);
@@ -49,14 +53,15 @@ int main() {
   surface_t zbuffer =
       surface_alloc(FMT_RGBA16, display_get_width(), display_get_height());
 
+  object_init();
+
   object_add((Object *)cube_build((vec3){0, -0.9F, 0.7f}));
   object_add((Object *)floor_build(0));
-  int n_segments = 5;
-  float rot_pitch = 0.0f;
-  float rot_yaw = 0.0f;
 
-  object_init();
   Object *player_obj = object_add((Object *)player_build(&input_state.left));
+  Object *sphere_obj =
+      object_add((Object *)objectsphere_build(&input_state.right));
+  //((ObjectSphere *)sphere_obj)->radius = 4;
 
   { // setup mats
     glMatrixMode(GL_PROJECTION);
@@ -89,6 +94,11 @@ int main() {
   struct SplitScreenArea area_left = {0, 0, -1, screen_h},
                          area_right = {-1, 0, screen_w, screen_h};
   float area_left_right_divide_x = screen_w * 0.6f;
+
+  input_clear_redirects();
+  if (wip_cur_control_part >= 0) {
+    input_set_redirect(0, wip_cur_control_part, 1);
+  }
 
   physics_reset_tick();
 
@@ -149,6 +159,8 @@ int main() {
 
       glprim_pyramid((vec3){-1.0F, -5.0F, -30.0F});
 
+      // TODO draw right objects?
+
       // reset the viewport and scissoring (impacts later rdpq_font calls
       // otherwise)
       splitscreen_area_reset();
@@ -158,7 +170,14 @@ int main() {
 
     { // font block, the gl block clears the cfb, so draw text after.
       char fps_str[256];
-      sprintf(fps_str, "DELTA: %02f", tick_seconds);
+      sprintf(fps_str, "DELTA: %02f   controlling:%d=%s", tick_seconds,
+              wip_cur_control_part,
+              wip_cur_control_part < 0 ? "none"
+                                       : ((char *[]){
+                                             [CONTROLPART_LEFT] = "left",
+                                             [CONTROLPART_RIGHT] = "right",
+                                             [CONTROLPART_GLOBAL] = "global",
+                                         })[wip_cur_control_part]);
       rdpq_font_begin(
           RGBA32(0xED, 0xAE, 0x49, 0xFF)); // gl immediate-mode like syntax for
                                            // drawing font on the screen.
@@ -170,28 +189,34 @@ int main() {
                         // every rendering pass.
 
     {
-      float rotspeed_yaw = 360; // degrees per second
-      float rotspeed_pitch = 360;
 
-      rot_yaw += input_state.left.pressed.x * tick_seconds * rotspeed_yaw;
-      rot_pitch += input_state.left.pressed.y * tick_seconds * rotspeed_pitch;
-
-      if (input_state.left.down.C_up)
-        n_segments++;
-      if (input_state.left.down.C_down)
-        n_segments--;
+      // TODO figure out how control switching works
+      // for now, press start to cycle between controlled parts
+      if (get_keys_down().c[0].start) {
+        wip_cur_control_part++;
+        if (wip_cur_control_part >= CONTROLPART_NUM) {
+          wip_cur_control_part = -1;
+        }
+        input_clear_redirects();
+        if (wip_cur_control_part >= 0) {
+          input_set_redirect(0, wip_cur_control_part, 1);
+        }
+      }
 
       // move the divide between the left and right areas using C left/right
-      if (input_state.left.pressed.C_left || input_state.left.pressed.C_right)
+      if (input_state.global.pressed.C_left ||
+          input_state.global.pressed.C_right)
         area_left_right_divide_x +=
-            (input_state.left.pressed.C_left ? -1 : 1) * 50 * tick_seconds;
+            (input_state.global.pressed.C_left ? -1 : 1) * 50 * tick_seconds;
 
       area_left_right_divide_x =
           CLAMP(area_left_right_divide_x, screen_w * SPLIT_MIN_PERCENT,
                 screen_w * SPLIT_MAX_PERCENT);
 
-      if (input_state.left.down.C_down)
+      if (input_state.global.down.C_down)
         object_remove_by_ptr(player_obj);
+      if (input_state.global.down.C_up)
+        object_remove_by_ptr(sphere_obj);
     }
 
     m_audio_update();

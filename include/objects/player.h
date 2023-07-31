@@ -11,13 +11,10 @@
 #include "include/physics.h"
 
 typedef struct Player {
-  ObjectType type; // every Object "substructure" has to have the same exact
-                   // starting structure as the parent. we're casting the player
-                   // down to an Object, so it needs to look the same, at least
-                   // in the first matching bytes.
-  vec3 position;
-  uint8_t num_colliders;
-  Collider *colliders;
+  Object o; // every Object "substructure" has to have the same exact
+            // starting structure as the parent. we're casting the player
+            // down to an Object, so it needs to look the same, at least
+            // in the first matching bytes.
 
   PlayerInput *input;
   float speed; // units per second

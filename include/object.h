@@ -11,7 +11,8 @@ typedef enum ObjectType {
   OBJ_PLAYER,
   OBJ_CUBE,
   OBJ_FLOOR,
-  OBJ_CRAB
+  OBJ_CRAB,
+  OBJ_SPHERE
 } ObjectType;
 
 // handled in the external LUT, an object is linked to a FnPointers structure by

@@ -1,6 +1,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <stdbool.h>
+
 #include <controller.h>
 
 typedef struct SI_condat SI_condat;
@@ -28,7 +30,17 @@ typedef struct InputState {
 
 extern InputState input_state;
 
+enum ControlPart {
+  CONTROLPART_LEFT,
+  CONTROLPART_RIGHT,
+  CONTROLPART_GLOBAL,
+  CONTROLPART_NUM
+};
+
 void input_init(void);
+void input_set_redirect(int controller_index, enum ControlPart control_part,
+                        bool redirect);
+void input_clear_redirects(void);
 void input_update(void);
 
 #endif // !INPUT_H
